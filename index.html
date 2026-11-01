@@ -1,0 +1,1464 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RARA Fashion Mall - Data Entry</title>
+<meta name="theme-color" content="#34205b">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<!-- Excel Export Library -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
+<!-- PDF Library -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+<style>
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    padding: 20px;
+    background: linear-gradient(135deg, #17152f, #34205b);
+    font-family: Arial, sans-serif;
+}
+
+.container {
+    max-width: 850px;
+    margin: auto;
+    padding: 25px;
+    background: #c2c3c8;
+    border-radius: 18px;
+    box-shadow: 0 10px 35px rgba(0,0,0,.2);
+}
+
+.logo {
+    text-align: center;
+    margin: 0 auto 1px;
+    padding: 0;
+    background: transparent;
+    border: none;
+    box-shadow: none;
+}
+
+.logo img {
+    width: 300px;
+    max-width: 100%;
+    height: 250px;
+    object-fit: contain;
+    display: block;
+    margin: auto;
+    background: transparent;
+    border: none;
+    border-radius: 0;
+    box-shadow: none;
+}
+
+h1 {
+    text-align: center;
+    color: #34205b;
+    margin-bottom: 5px;
+}
+
+.subtitle {
+    text-align: center;
+    color: #777;
+    margin-top: 0;
+    margin-bottom: 25px;
+}
+
+label {
+    display: block;
+    margin: 15px 0 7px;
+    font-weight: bold;
+    color: #29223c;
+}
+
+input, select {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #d5d0df;
+    border-radius: 8px;
+    font-size: 15px;
+    background: #fff;
+}
+
+input:focus, select:focus {
+    outline: 2px solid #a77bd3;
+    border-color: #7b35b5;
+}
+
+.item-row {
+    display: grid;
+    grid-template-columns: 1fr 115px;
+    gap: 12px;
+    align-items: end;
+    margin-bottom: 12px;
+}
+
+.item-row label {
+    margin-top: 8px;
+}
+
+.quantity-label {
+    color: #7b35b5;
+}
+
+.section-heading {
+    margin-top: 25px;
+    padding-bottom: 9px;
+    border-bottom: 2px solid #eee;
+    color: #34205b;
+}
+
+.discount-note {
+    color: #16834a;
+    font-size: 13px;
+    margin-top: 5px;
+}
+
+.due-entry-box {
+    margin-top: 25px;
+    padding: 17px;
+    background: #fff8e9;
+    border: 1px solid #f0d9a5;
+    border-radius: 12px;
+}
+
+.due-entry-box h3 {
+    margin-top: 0;
+    color: #805500;
+}
+
+.due-fields {
+    display: none;
+    margin-top: 12px;
+}
+
+.due-preview {
+    margin-top: 12px;
+    padding: 10px;
+    background: #fff;
+    border-radius: 8px;
+    color: #b42318;
+    font-weight: bold;
+}
+
+button {
+    border: none;
+    border-radius: 8px;
+    padding: 13px 18px;
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 14px;
+}
+
+.submit-btn {
+    width: 100%;
+    margin-top: 25px;
+    background: #7136a8;
+    color: white;
+}
+
+.submit-btn:hover {
+    background: #54247f;
+}
+
+.submit-btn:disabled {
+    background: #a994bd;
+    cursor: not-allowed;
+}
+
+.records {
+    margin-top: 30px;
+}
+
+.record {
+    background: #fff;
+    border: 1px solid #ddd;
+    border-left: 5px solid #7b35b5;
+    border-radius: 10px;
+    padding: 15px;
+    margin-top: 12px;
+    line-height: 1.8;
+    overflow-wrap: anywhere;
+}
+
+.record img {
+    max-width: 120px;
+    max-height: 120px;
+    object-fit: cover;
+    border-radius: 8px;
+    display: block;
+    margin-top: 10px;
+}
+
+.delete-btn {
+    background: #dc2626;
+    color: white;
+    margin-top: 12px;
+}
+
+.due-section {
+    display: none;
+    margin-top: 30px;
+    padding: 15px;
+    background: #fff0f0;
+    border-radius: 12px;
+}
+
+.due-section h3 {
+    color: #c62828;
+}
+
+.due-record {
+    border-left-color: #dc2626;
+}
+
+.excel-btn {
+    background: #16834a;
+    color: white;
+    margin: 10px 0;
+}
+
+#toast {
+    position: fixed;
+    left: 50%;
+    bottom: 25px;
+    transform: translateX(-50%);
+    color: #fff;
+    padding: 12px 20px;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: bold;
+    box-shadow: 0 6px 20px rgba(0,0,0,.3);
+    opacity: 0;
+    transition: opacity .3s;
+    z-index: 9999;
+    max-width: 90%;
+    text-align: center;
+    pointer-events: none;
+}
+
+.empty-message {
+    color: #888;
+    font-size: 14px;
+}
+
+.last-bill {
+    display: none;
+    margin-top: 20px;
+    padding: 16px;
+    background: #eafaf1;
+    border: 1px solid #a8e0c0;
+    border-radius: 12px;
+}
+
+.last-bill h3 {
+    margin: 0 0 6px;
+    color: #16834a;
+}
+
+.last-bill p {
+    margin: 0 0 12px;
+    color: #29223c;
+    overflow-wrap: anywhere;
+}
+
+.wa-btn {
+    background: #25d366;
+    color: #fff;
+    margin: 4px 6px 4px 0;
+}
+
+.pdf-btn {
+    background: #34205b;
+    color: #fff;
+    margin: 4px 6px 4px 0;
+}
+
+@media(max-width: 550px) {
+    body {
+        padding: 10px;
+    }
+
+    .container {
+        padding: 16px;
+    }
+
+    .item-row {
+        grid-template-columns: 1fr 95px;
+        gap: 8px;
+    }
+}
+</style>
+
+<!-- ===== Premium look (mobile-first overrides) ===== -->
+<style>
+:root {
+    --p1: #34205b;
+    --p2: #7136a8;
+    --p3: #c04fd0;
+    --gold: #f5b942;
+}
+
+body {
+    min-height: 100vh;
+    background:
+        radial-gradient(circle at 12% 8%, rgba(192,79,208,.38), transparent 42%),
+        radial-gradient(circle at 92% 92%, rgba(245,185,66,.20), transparent 42%),
+        linear-gradient(135deg, #120f2b, #34205b 55%, #5b2a86);
+    background-attachment: fixed;
+    font-family: 'Poppins', 'Segoe UI', Roboto, Arial, sans-serif;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.container {
+    position: relative;
+    max-width: 760px;
+    padding: 26px 22px 30px;
+    border-radius: 24px;
+    overflow: hidden;
+    box-shadow:
+        0 25px 60px rgba(0,0,0,.45),
+        0 0 0 1px rgba(255,255,255,.08),
+        0 0 80px rgba(192,79,208,.25);
+}
+
+.container::before {
+    content: "";
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 6px;
+    background: linear-gradient(90deg, var(--p2), var(--p3), var(--gold));
+}
+
+/* Logo effect */
+.logo {
+    padding-top: 10px;
+    background: radial-gradient(circle at 50% 50%, rgba(192,79,208,.18), transparent 62%);
+}
+
+.logo img {
+    width: auto;
+    height: 150px;
+    max-width: 70%;
+    filter: drop-shadow(0 8px 14px rgba(113,54,168,.45));
+    animation: logoFloat 4s ease-in-out infinite;
+}
+
+@keyframes logoFloat {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-6px); }
+}
+
+/* Title */
+h1 {
+    margin: 6px 0;
+    font-size: 30px;
+    letter-spacing: 1px;
+    background: linear-gradient(90deg, var(--p1), var(--p2), var(--p3));
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    color: transparent;
+    filter: drop-shadow(0 2px 3px rgba(52,32,91,.25));
+}
+
+.subtitle {
+    display: table;
+    margin: 0 auto 22px;
+    padding: 6px 16px;
+    border-radius: 999px;
+    background: linear-gradient(90deg, #f3e9fb, #fdf0d5);
+    color: #6b3fa0;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: .5px;
+}
+
+/* Fields */
+label {
+    margin: 16px 0 6px;
+    font-size: 13.5px;
+    color: #3a2a63;
+}
+
+input, select {
+    padding: 12px 14px;
+    border: 1.5px solid #e2d9ee;
+    border-radius: 12px;
+    background: #fbf9fe;
+    color: #29223c;
+    font-size: 16px;
+    transition: border-color .2s, box-shadow .2s, background .2s;
+}
+
+input:focus, select:focus {
+    outline: none;
+    border-color: var(--p2);
+    background: #fff;
+    box-shadow: 0 0 0 4px rgba(113,54,168,.15);
+}
+
+input[type="checkbox"] {
+    width: 20px !important;
+    height: 20px;
+    padding: 0;
+    vertical-align: middle;
+    accent-color: var(--p2);
+}
+
+#discountPercent {
+    background: #effaf3;
+    border-color: #bfe8cf;
+    color: #16834a;
+    font-weight: 700;
+}
+
+/* Items: smaller quantity */
+.item-row {
+    grid-template-columns: 1fr 76px;
+    gap: 10px;
+    margin-bottom: 12px;
+    padding: 2px 12px 12px;
+    background: linear-gradient(135deg, #f8f3fd, #ffffff);
+    border: 1px solid #eadff7;
+    border-radius: 14px;
+    box-shadow: 0 4px 12px rgba(113,54,168,.07);
+}
+
+.item-row label {
+    margin-top: 10px;
+    font-size: 13px;
+}
+
+.quantity-label {
+    text-align: center;
+    font-size: 12px;
+    color: var(--p3);
+}
+
+#shirtQty, #jeansQty, #tshirtQty {
+    padding: 12px 4px;
+    text-align: center;
+    text-align-last: center;
+    font-weight: 700;
+    color: var(--p2);
+}
+
+.section-heading {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 26px;
+    padding: 0 0 4px;
+    border-bottom: 0;
+    font-size: 16px;
+    color: var(--p1);
+}
+
+.section-heading::before {
+    content: "";
+    width: 5px;
+    height: 20px;
+    border-radius: 4px;
+    background: linear-gradient(var(--p2), var(--p3));
+}
+
+.discount-note {
+    display: inline-block;
+    padding: 6px 10px;
+    border-radius: 8px;
+    background: #effaf3;
+    font-size: 12px;
+}
+
+/* Due box */
+.due-entry-box {
+    border-radius: 16px;
+    background: linear-gradient(135deg, #fff8e9, #ffeccb);
+    box-shadow: 0 6px 16px rgba(128,85,0,.12);
+}
+
+.due-preview {
+    border-left: 4px solid #dc2626;
+    box-shadow: 0 3px 10px rgba(180,35,24,.12);
+}
+
+/* Buttons */
+button {
+    border-radius: 12px;
+    transition: transform .15s, box-shadow .15s, filter .15s;
+}
+
+button:active {
+    transform: scale(.97);
+}
+
+.submit-btn {
+    padding: 16px;
+    border-radius: 14px;
+    background: linear-gradient(90deg, var(--p2), var(--p3));
+    font-size: 16px;
+    letter-spacing: 1px;
+    box-shadow: 0 10px 22px rgba(113,54,168,.4);
+}
+
+.submit-btn:hover {
+    background: linear-gradient(90deg, #5e2a8e, #a93bbb);
+    transform: translateY(-2px);
+}
+
+.submit-btn:disabled {
+    background: #a994bd;
+    box-shadow: none;
+    transform: none;
+}
+
+.wa-btn {
+    background: linear-gradient(90deg, #128c7e, #25d366);
+    box-shadow: 0 6px 14px rgba(37,211,102,.35);
+}
+
+.pdf-btn {
+    background: linear-gradient(90deg, #34205b, #5b2a86);
+    box-shadow: 0 6px 14px rgba(52,32,91,.3);
+}
+
+.delete-btn {
+    background: linear-gradient(90deg, #dc2626, #f05252);
+    box-shadow: 0 6px 14px rgba(220,38,38,.3);
+}
+
+/* Cards */
+.records h3 {
+    color: var(--p1);
+}
+
+.record {
+    border-radius: 14px;
+    border: 1px solid #efe8f7;
+    border-left: 5px solid var(--p2);
+    box-shadow: 0 6px 16px rgba(52,32,91,.10);
+}
+
+.due-record {
+    border-left-color: #dc2626;
+}
+
+.due-section {
+    border-radius: 16px;
+    box-shadow: 0 6px 16px rgba(220,38,38,.10);
+}
+
+.last-bill {
+    border-radius: 16px;
+    background: linear-gradient(135deg, #eafaf1, #d8f5e6);
+    box-shadow: 0 8px 20px rgba(22,131,74,.15);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .logo img { animation: none; }
+}
+
+/* Phone */
+@media (max-width: 550px) {
+    body { padding: 10px; }
+
+    .container {
+        padding: 22px 14px 26px;
+        border-radius: 20px;
+    }
+
+    .logo img { height: 120px; }
+
+    h1 { font-size: 24px; }
+
+    .item-row {
+        grid-template-columns: 1fr 64px;
+        gap: 8px;
+        padding: 2px 10px 10px;
+    }
+
+    #shirtQty, #jeansQty, #tshirtQty { padding: 12px 2px; }
+
+    button { min-height: 46px; }
+
+    .action-row button {
+        flex: 1 1 45%;
+    }
+
+    .record { font-size: 14px; }
+}
+</style>
+
+</head>
+
+<body>
+
+<div class="container">
+
+    <!-- Logo -->
+    <div class="logo">
+        <img id="logoPreview" src="rlogo.png" alt="RARA Logo">
+    </div>
+
+    <h1>RARA Fashion Mall</h1>
+    <p class="subtitle">Product Data Entry Form</p>
+
+    <form id="entryForm">
+
+        <label for="date">1. Date</label>
+        <input type="date" id="date">
+
+        <label for="customerName">3. Customer Name (Optional)</label>
+        <input type="text" id="customerName" placeholder="Enter Customer Name">
+
+        <label for="customerPhone">Customer No. (Optional)</label>
+        <input type="tel" id="customerPhone" placeholder="10 digit mobile number" maxlength="15" inputmode="numeric">
+
+        <h3 class="section-heading">2. Select Items & Quantity</h3>
+
+        <!-- Shirt -->
+        <div class="item-row">
+            <div>
+                <label for="shirt">Shirt</label>
+                <select id="shirt">
+                    <option value="">Select Shirt</option>
+                    <optgroup label="Shirts">
+                        <option>Shirt</option>
+                        <option>Boxy Shirt</option>
+                        <option>Half Shirt</option>
+                        <option>Full Sleeve Shirt</option>
+                        <option>Formal Shirt</option>
+                        <option>Casual Shirt</option>
+                        <option>Check Shirt</option>
+                        <option>Striped Shirt</option>
+                        <option>Printed Shirt</option>
+                        <option>Plain Shirt</option>
+                        <option>Linen Shirt</option>
+                        <option>Cotton Shirt</option>
+                        <option>Denim Shirt</option>
+                        <option>Cuban Collar Shirt</option>
+                        <option>Oversized Shirt</option>
+                        <option>Slim Fit Shirt</option>
+                        <option>Mandarin Collar Shirt</option>
+                        <option>Party Wear Shirt</option>
+                        <option>Flannel Shirt</option>
+                    </optgroup>
+                </select>
+            </div>
+            <div>
+                <label class="quantity-label" for="shirtQty">Qty</label>
+                <select id="shirtQty">
+                    <option value="1">1</option>
+                    <option value="2">2</option>
+                    <option value="3">3</option>
+                    <option value="4">4</option>
+                    <option value="5">5</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Jeans -->
+        <div class="item-row">
+            <div>
+                <label for="jeans">Jeans / Pants</label>
+                <select id="jeans">
+                    <option value="">Select Jeans / Pants</option>
+                    <optgroup label="Jeans">
+                        <option>Jeans</option>
+                        <option>Baggy Jeans</option>
+                        <option>Slim Fit Jeans</option>
+                        <option>Straight Fit Jeans</option>
+                        <option>Skinny Jeans</option>
+                        <option>Bootcut Jeans</option>
+                        <option>Ripped Jeans</option>
+                        <option>Loose Fit Jeans</option>
+                        <option>Cargo Jeans</option>
+                    </optgroup>
+                    <optgroup label="Pants">
+                        <option>Lilan Pant</option>
+                        <option>Formal Pant</option>
+                        <option>Cotton Pant</option>
+                        <option>Chinos</option>
+                        <option>Cargo Pant</option>
+                        <option>Korean Pant</option>
+                        <option>Trouser</option>
+                        <option>Track Pant</option>
+                        <option>Jogger</option>
+                        <option>Lower</option>
+                        <option>Shorts</option>
+                        <option>3/4 Capri</option>
+                    </optgroup>
+                </select>
+            </div>
+            <div>
+                <label class="quantity-label" for="jeansQty">Qty</label>
+                <select id="jeansQty">
+                    <option value="1">1</option>
+                    <option value="2">2</option>
+                    <option value="3">3</option>
+                    <option value="4">4</option>
+                    <option value="5">5</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- T-Shirt -->
+        <div class="item-row">
+            <div>
+                <label for="tshirt">T-Shirts</label>
+                <select id="tshirt">
+                    <option value="">Select T-Shirt</option>
+                    <optgroup label="T-Shirts">
+                        <option>T-Shirt</option>
+                        <option>Half T-Shirt</option>
+                        <option>Full T-Shirt</option>
+                        <option>Down Shoulders</option>
+                        <option>Round Neck T-Shirt</option>
+                        <option>V-Neck T-Shirt</option>
+                        <option>Polo T-Shirt</option>
+                        <option>Collar T-Shirt</option>
+                        <option>Oversized T-Shirt</option>
+                        <option>Printed T-Shirt</option>
+                        <option>Plain T-Shirt</option>
+                        <option>Graphic T-Shirt</option>
+                        <option>Sleeveless / Vest</option>
+                        <option>Hoodie</option>
+                        <option>Sweatshirt</option>
+                        <option>Jacket</option>
+                    </optgroup>
+                </select>
+            </div>
+            <div>
+                <label class="quantity-label" for="tshirtQty">Qty</label>
+                <select id="tshirtQty">
+                    <option value="1">1</option>
+                    <option value="2">2</option>
+                    <option value="3">3</option>
+                    <option value="4">4</option>
+                    <option value="5">5</option>
+                </select>
+            </div>
+        </div>
+
+        <label for="mrp">4. MRP (₹)</label>
+        <input type="number" id="mrp" placeholder="Enter MRP" min="0" step="0.01">
+
+        <label for="discountPercent">5. Discount Percentage (%)</label>
+        <input type="text" id="discountPercent" readonly placeholder="Automatic Calculation">
+
+        <p class="discount-note">
+            Discount Percentage MRP aur Final Price ke hisaab se automatic calculate hoga.
+        </p>
+
+        <label for="finalPrice">6. Final Price (₹)</label>
+        <input type="number" id="finalPrice" placeholder="Enter Final Price" min="0" step="0.01">
+
+        <label for="paymentMode">10. Customer Payment Mode</label>
+        <select id="paymentMode">
+            <option value="">Select Payment Mode</option>
+            <option value="Cash">Cash</option>
+            <option value="Online">Online</option>
+        </select>
+
+        <label for="custom">7. Custom Item (Optional)</label>
+        <input type="text" id="custom" placeholder="Enter Custom Item">
+
+        <!-- Separate Due Entry -->
+        <div class="due-entry-box">
+            <h3>9. Payment / Due Details (Optional)</h3>
+
+            <label>
+                <input type="checkbox" id="hasDue" style="width:auto; margin-right:8px;">
+                Customer ka payment pending hai
+            </label>
+
+            <div class="due-fields" id="dueFields">
+
+                <label for="paidAmount">Paid Amount (₹)</label>
+                <input type="number" id="paidAmount" placeholder="Enter Paid Amount" min="0" step="0.01">
+
+                <div class="due-preview" id="duePreview">
+                    Due Amount: ₹0.00
+                </div>
+            </div>
+        </div>
+
+        <button type="submit" class="submit-btn" id="submitBtn">
+            SUBMIT DATA
+        </button>
+
+    </form>
+
+    <!-- Last saved bill: WhatsApp / PDF -->
+    <div class="last-bill" id="lastBill">
+        <h3>Data Saved ✔</h3>
+        <p id="lastBillInfo"></p>
+        <button type="button" class="wa-btn" onclick="sendWhatsApp()">SEND PDF ON WHATSAPP</button>
+        <button type="button" class="pdf-btn" onclick="downloadPdf()">DOWNLOAD PDF</button>
+    </div>
+
+    <!-- Submitted Records -->
+    <div class="records">
+        <h3>Submitted Records</h3>
+
+        <button type="button" class="wa-btn" style="margin:10px 0;" onclick="sendLastBill()">
+            SEND BILL TO CUSTOMER
+        </button>
+
+        <div id="recordList">
+            <p class="empty-message">No records submitted yet.</p>
+        </div>
+    </div>
+
+    <!-- Due Records - Hidden until there is a due record -->
+    <div class="due-section" id="dueSection">
+        <h3>Customer Due Records</h3>
+        <div id="dueList"></div>
+    </div>
+
+</div>
+
+<script>
+const $ = id => document.getElementById(id);
+
+// Google Sheet (Apps Script Web App) URL
+const SHEET_URL = "https://script.google.com/macros/s/AKfycbwASNqB6kVVAzKnmnb8JVCLHkI_fjuFS6us-Ru-Xl38nkaNR6n4k-tRBLwO2qh9HLulYw/exec";
+
+// Shop details (PDF bill me dikhenge) - yahan badal sakte ho
+const SHOP_ADDRESS = "Jamua Thana More, Main Road, Jamua - 815318";
+const SHOP_PHONE = "7322888445 / 90073498004";
+
+let salesRecords = [];
+let nextRecordId = 1;
+
+// Send one record to Google Sheet
+function sendToSheet(record) {
+    const payload = {
+        "Date": record.date,
+        "Customer Name": record.customer,
+        "Customer No": record.customerPhone,
+        "Items": record.items.map(i => i.name + " (Qty: " + i.quantity + ")").join(", "),
+        "MRP": record.mrp || "",
+        "Discount %": record.discountPercent !== null ? record.discountPercent.toFixed(2) + "%" : "",
+        "Final Price": record.finalPrice || "",
+        "Custom Item": record.custom,
+        "Payment Mode": record.paymentMode,
+        "Paid Amount": record.dueAmount > 0 ? record.paidAmount : "",
+        "Due Amount": record.dueAmount > 0 ? record.dueAmount : ""
+    };
+
+    return fetch(SHEET_URL, {
+        method: "POST",
+        mode: "no-cors",
+        keepalive: true,
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
+        body: JSON.stringify(payload)
+    });
+}
+
+// Chhota message (alert ki tarah rukta nahi)
+function showToast(msg, isError) {
+    let t = $("toast");
+    if (!t) {
+        t = document.createElement("div");
+        t.id = "toast";
+        document.body.appendChild(t);
+    }
+    t.textContent = msg;
+    t.style.background = isError ? "#dc2626" : "#16834a";
+    t.style.opacity = "1";
+    clearTimeout(t._timer);
+    t._timer = setTimeout(() => { t.style.opacity = "0"; }, isError ? 5000 : 2500);
+}
+
+// Today's date
+function setTodayDate() {
+    const today = new Date();
+    const localDate = new Date(
+        today.getTime() - today.getTimezoneOffset() * 60000
+    ).toISOString().split("T")[0];
+
+    $("date").value = localDate;
+}
+setTodayDate();
+
+
+// Discount Calculation
+function calculateDiscount() {
+    const mrp = Number($("mrp").value);
+    const finalPrice = Number($("finalPrice").value);
+
+    if ($("mrp").value !== "" && $("finalPrice").value !== "" && mrp > 0) {
+        const discountPercent = ((mrp - finalPrice) / mrp) * 100;
+        $("discountPercent").value = discountPercent.toFixed(2) + "%";
+    } else {
+        $("discountPercent").value = "";
+    }
+
+    calculateDuePreview();
+}
+
+$("mrp").addEventListener("input", calculateDiscount);
+$("finalPrice").addEventListener("input", calculateDiscount);
+
+
+// Show / Hide Due Entry Fields
+$("hasDue").addEventListener("change", function() {
+    $("dueFields").style.display = this.checked ? "block" : "none";
+
+    if (!this.checked) {
+        $("paidAmount").value = "";
+    }
+
+    calculateDuePreview();
+});
+
+$("paidAmount").addEventListener("input", calculateDuePreview);
+
+
+// Calculate Due Preview
+function calculateDuePreview() {
+    const finalPrice = Number($("finalPrice").value) || 0;
+    const paid = Number($("paidAmount").value) || 0;
+    const due = Math.max(0, finalPrice - paid);
+
+    $("duePreview").textContent = "Due Amount: ₹" + due.toFixed(2);
+}
+
+
+// Safe text for HTML
+function safeText(value) {
+    return String(value ?? "").replace(/[&<>"']/g, char => ({
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        '"': "&quot;",
+        "'": "&#039;"
+    })[char]);
+}
+
+
+// Format currency
+function money(value) {
+    return "₹" + Number(value || 0).toFixed(2);
+}
+
+
+// Render all records
+function renderRecords() {
+    const recordList = $("recordList");
+    const dueList = $("dueList");
+
+    recordList.innerHTML = "";
+    dueList.innerHTML = "";
+
+    if (salesRecords.length === 0) {
+        recordList.innerHTML = '<p class="empty-message">No records submitted yet.</p>';
+    }
+
+    salesRecords.forEach(record => {
+
+        // Main Record
+        const card = document.createElement("div");
+        card.className = "record";
+
+        card.innerHTML = `
+            <b>Date:</b> ${safeText(record.date || "-")}<br>
+            <b>Customer Name:</b> ${safeText(record.customer || "-")}<br>
+            <b>Customer No:</b> ${safeText(record.customerPhone || "-")}<br>
+            <b>Items:</b><br>
+            ${record.items.map(item =>
+                safeText(item.name) + " - Qty: " + item.quantity
+            ).join("<br>")}<br>
+            <b>MRP:</b> ${record.mrp > 0 ? money(record.mrp) : "-"}<br>
+            <b>Discount:</b> ${record.discountPercent !== null
+                ? record.discountPercent.toFixed(2) + "%"
+                : "-"}<br>
+            <b>Final Price:</b> ${record.finalPrice > 0 ? money(record.finalPrice) : "-"}<br>
+            <b>Payment Mode:</b> ${safeText(record.paymentMode || "-")}<br>
+            <b>Custom Item:</b> ${safeText(record.custom || "-")}
+        `;
+
+        const deleteBtn = document.createElement("button");
+        deleteBtn.type = "button";
+        deleteBtn.className = "delete-btn";
+        deleteBtn.textContent = "DELETE";
+
+        deleteBtn.addEventListener("click", function() {
+            if (confirm("Are you sure you want to delete this record?\n(Google Sheet se row delete nahi hogi.)")) {
+                salesRecords = salesRecords.filter(item => item.id !== record.id);
+                renderRecords();
+            }
+        });
+
+        const waBtn = document.createElement("button");
+        waBtn.type = "button";
+        waBtn.className = "wa-btn";
+        waBtn.style.marginTop = "12px";
+        waBtn.textContent = "WHATSAPP PDF";
+        waBtn.addEventListener("click", () => sendWhatsApp(record));
+
+        card.appendChild(waBtn);
+        card.appendChild(deleteBtn);
+        recordList.appendChild(card);
+
+
+        // Due Record - Only if actual due exists
+        if (record.dueAmount > 0) {
+            const dueCard = document.createElement("div");
+            dueCard.className = "record due-record";
+
+            dueCard.innerHTML = `
+                <b>Customer:</b> ${safeText(record.customer || "-")}<br>
+                <b>Date:</b> ${safeText(record.date || "-")}<br>
+                <b>Items:</b><br>
+                ${record.items.map(item =>
+                    safeText(item.name) + " - Qty: " + item.quantity
+                ).join("<br>")}<br>
+                <b>Final Price:</b> ${money(record.finalPrice)}<br>
+                <b>Payment Mode:</b> ${safeText(record.paymentMode)}<br>
+                <b>Paid Amount:</b> ${money(record.paidAmount)}<br>
+                <b>Remaining Due:</b> ${money(record.dueAmount)}
+            `;
+
+            dueList.appendChild(dueCard);
+        }
+    });
+
+    // Hide Due Section when there are no due records
+    const hasAnyDue = salesRecords.some(record => record.dueAmount > 0);
+    $("dueSection").style.display = hasAnyDue ? "block" : "none";
+}
+
+
+// Submit Form
+$("entryForm").addEventListener("submit", function(event) {
+    event.preventDefault();
+
+    const date = $("date").value;
+    const customer = $("customerName").value.trim();
+    const customerPhone = $("customerPhone").value.trim();
+
+    const mrp = Number($("mrp").value) || 0;
+    const finalPrice = Number($("finalPrice").value) || 0;
+
+    const shirt = $("shirt").value;
+    const jeans = $("jeans").value;
+    const tshirt = $("tshirt").value;
+    const custom = $("custom").value.trim();
+
+    const items = [];
+
+    if (shirt) {
+        items.push({ name: shirt, quantity: Number($("shirtQty").value) });
+    }
+
+    if (jeans) {
+        items.push({ name: jeans, quantity: Number($("jeansQty").value) });
+    }
+
+    if (tshirt) {
+        items.push({ name: tshirt, quantity: Number($("tshirtQty").value) });
+    }
+
+    if (custom) {
+        items.push({ name: custom, quantity: 1 });
+    }
+
+    // At least one item required
+    if (items.length === 0) {
+        alert("Please select at least one item or enter a Custom Item!");
+        return;
+    }
+
+    // Price validation
+    if (mrp > 0 && finalPrice > mrp) {
+        alert("Final Price MRP se jyada nahi ho sakta!");
+        return;
+    }
+
+    if (mrp > 0 && finalPrice === 0) {
+        alert("Please enter Final Price!");
+        return;
+    }
+
+    const discountPercent = mrp > 0 && finalPrice > 0
+        ? ((mrp - finalPrice) / mrp) * 100
+        : null;
+
+    // Payment mode (always recorded)
+    const paymentMode = $("paymentMode").value;
+    let paidAmount = 0;
+    let dueAmount = 0;
+
+    // Due details are optional
+    if ($("hasDue").checked) {
+        paidAmount = Number($("paidAmount").value) || 0;
+
+        if (finalPrice <= 0) {
+            alert("Due entry ke liye Final Price enter karna zaroori hai!");
+            return;
+        }
+
+        if (!paymentMode) {
+            alert("Please select Customer Payment Mode!");
+            return;
+        }
+
+        if ($("paidAmount").value === "") {
+            alert("Please enter Paid Amount!");
+            return;
+        }
+
+        if (paidAmount > finalPrice) {
+            alert("Paid Amount Final Price se jyada nahi ho sakta!");
+            return;
+        }
+
+        dueAmount = finalPrice - paidAmount;
+
+        if (dueAmount <= 0) {
+            alert("Is customer ka koi Due nahi hai. Due option ko uncheck karke submit karein.");
+            return;
+        }
+    }
+
+    const record = {
+        id: nextRecordId++,
+        date,
+        customer,
+        customerPhone,
+        items,
+        mrp,
+        finalPrice,
+        discountPercent,
+        custom,
+        paymentMode,
+        paidAmount,
+        dueAmount
+    };
+
+    salesRecords.unshift(record);
+    renderRecords();
+    showLastBill(record);
+
+    // Google Sheet me background me bhejo (form ko wait nahi karna padta)
+    showToast("Data Submitted ✔  (Sheet me save ho raha hai...)", false);
+    sendToSheet(record).catch(() => {
+        showToast("Google Sheet me save nahi hua! Internet check karein.", true);
+    });
+
+    this.reset();
+    setTodayDate();
+
+    $("dueFields").style.display = "none";
+    $("duePreview").textContent = "Due Amount: ₹0.00";
+    $("discountPercent").value = "";
+});
+
+
+// ---------- PDF + WhatsApp ----------
+let lastRecord = null;
+
+function showLastBill(record) {
+    lastRecord = record;
+    $("lastBillInfo").textContent =
+        (record.customer || "Customer") + " | " + money(record.finalPrice) +
+        (record.customerPhone ? " | " + record.customerPhone : "");
+    $("lastBill").style.display = "block";
+    $("lastBill").scrollIntoView({ behavior: "smooth", block: "center" });
+}
+
+function cleanPhone(p) {
+    let d = String(p || "").replace(/\D/g, "");
+    if (d.length === 10) d = "91" + d;
+    else if (d.length === 11 && d[0] === "0") d = "91" + d.slice(1);
+    return d;
+}
+
+function pdfMoney(v) {
+    return "Rs. " + Number(v || 0).toFixed(2);
+}
+
+function buildPdf(record) {
+    if (!window.jspdf) {
+        alert("PDF library load nahi hui. Internet connection check karein.");
+        return null;
+    }
+
+    const doc = new window.jspdf.jsPDF({ unit: "mm", format: "a4" });
+    const W = 210;
+    const PURPLE = [52, 32, 91];
+    const ACCENT = [113, 54, 168];
+    const LIGHT = [246, 243, 250];
+    const GREY = [115, 112, 125];
+    const DARK = [35, 30, 50];
+    const GREEN = [22, 131, 74];
+    const RED = [180, 35, 24];
+
+    const invNo = "RARA-" + String(record.date || "").replace(/-/g, "") +
+        "-" + String(record.id).padStart(3, "0");
+
+    // ----- Header band -----
+    doc.setFillColor(...PURPLE);
+    doc.rect(0, 0, W, 46, "F");
+    doc.setFillColor(...ACCENT);
+    doc.rect(0, 46, W, 2.5, "F");
+
+    // Logo (skipped automatically if browser blocks it)
+    let textX = 15;
+    try {
+        const img = $("logoPreview");
+        if (img && img.complete && img.naturalWidth > 0) {
+            const c = document.createElement("canvas");
+            c.width = img.naturalWidth;
+            c.height = img.naturalHeight;
+            c.getContext("2d").drawImage(img, 0, 0);
+            const data = c.toDataURL("image/png");
+            const h = 28;
+            const w = Math.min(40, h * img.naturalWidth / img.naturalHeight);
+            doc.setFillColor(255, 255, 255);
+            doc.roundedRect(12, 7, w + 6, 32, 3, 3, "F");
+            doc.addImage(data, "PNG", 15, 9, w, h);
+            textX = 15 + w + 12;
+        }
+    } catch (e) { /* no logo */ }
+
+    doc.setTextColor(255, 255, 255);
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(20);
+    doc.text("RARA Fashion Mall", textX, 19);
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(10);
+    doc.text("Sales Invoice", textX, 26);
+    doc.setFontSize(8.5);
+    doc.text(SHOP_ADDRESS, textX, 34);
+    doc.text("Contact: " + SHOP_PHONE, textX, 40);
+
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(24);
+    doc.text("INVOICE", W - 15, 20, { align: "right" });
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(9);
+    doc.text("Invoice No: " + invNo, W - 15, 28, { align: "right" });
+    doc.text("Date: " + (record.date || "-"), W - 15, 34, { align: "right" });
+
+    // ----- Customer / payment box -----
+    doc.setFillColor(...LIGHT);
+    doc.roundedRect(15, 52, 180, 30, 2, 2, "F");
+
+    doc.setTextColor(...GREY);
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(8);
+    doc.text("BILLED TO", 21, 60);
+    doc.text("PAYMENT MODE", 120, 60);
+
+    doc.setTextColor(...DARK);
+    doc.setFontSize(13);
+    doc.text(record.customer || "Walk-in Customer", 21, 68);
+    doc.text(record.paymentMode || "-", 120, 68);
+
+    if (record.customerPhone) {
+        doc.setFont("helvetica", "normal");
+        doc.setFontSize(10);
+        doc.setTextColor(...GREY);
+        doc.text("Mobile: " + record.customerPhone, 21, 76);
+    }
+
+    // Paid / Due badge
+    const isDue = record.dueAmount > 0;
+    doc.setFillColor(...(isDue ? RED : GREEN));
+    doc.roundedRect(165, 57, 24, 9, 2, 2, "F");
+    doc.setTextColor(255, 255, 255);
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(10);
+    doc.text(isDue ? "DUE" : "PAID", 177, 63, { align: "center" });
+
+    // ----- Items table -----
+    let y = 94;
+    doc.setFillColor(...PURPLE);
+    doc.rect(15, y, 180, 9, "F");
+    doc.setTextColor(255, 255, 255);
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(9);
+    doc.text("#", 20, y + 6);
+    doc.text("ITEM DESCRIPTION", 32, y + 6);
+    doc.text("QTY", 190, y + 6, { align: "right" });
+    y += 9;
+
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(10.5);
+    record.items.forEach((it, i) => {
+        if (i % 2 === 0) {
+            doc.setFillColor(...LIGHT);
+            doc.rect(15, y, 180, 9, "F");
+        }
+        doc.setTextColor(...DARK);
+        doc.text(String(i + 1), 20, y + 6);
+        doc.text(String(it.name), 32, y + 6);
+        doc.text(String(it.quantity), 190, y + 6, { align: "right" });
+        y += 9;
+    });
+    doc.setDrawColor(...ACCENT);
+    doc.setLineWidth(0.6);
+    doc.line(15, y, 195, y);
+
+    // ----- Summary (right side) -----
+    y += 12;
+    const sx = 115;
+    const sRow = (label, value, color, bold) => {
+        doc.setFont("helvetica", bold ? "bold" : "normal");
+        doc.setFontSize(10.5);
+        doc.setTextColor(...(color || DARK));
+        doc.text(label, sx + 5, y);
+        doc.text(value, 190, y, { align: "right" });
+        y += 8;
+    };
+
+    if (record.mrp > 0) sRow("MRP", pdfMoney(record.mrp));
+    if (record.discountPercent !== null) sRow("Discount", record.discountPercent.toFixed(2) + "%", GREEN);
+    if (record.mrp > 0 && record.finalPrice > 0 && record.mrp > record.finalPrice) {
+        sRow("You Save", pdfMoney(record.mrp - record.finalPrice), GREEN);
+    }
+
+    if (record.finalPrice > 0) {
+        y += 1;
+        doc.setFillColor(...ACCENT);
+        doc.roundedRect(sx, y - 6, 80, 11, 2, 2, "F");
+        doc.setTextColor(255, 255, 255);
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(11);
+        doc.text("TOTAL AMOUNT", sx + 5, y + 1.5);
+        doc.text(pdfMoney(record.finalPrice), 190, y + 1.5, { align: "right" });
+        y += 14;
+    }
+
+    if (isDue) {
+        sRow("Paid Amount", pdfMoney(record.paidAmount));
+        sRow("Balance Due", pdfMoney(record.dueAmount), RED, true);
+    }
+
+    // ----- Thank you (left side) -----
+    doc.setTextColor(...ACCENT);
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(18);
+    doc.text("Thank You!", 15, 124);
+    doc.setTextColor(...GREY);
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(10);
+    doc.text("We appreciate your purchase", 15, 131);
+    doc.text("and hope to see you again.", 15, 137);
+
+    // ----- Footer -----
+    doc.setFillColor(...PURPLE);
+    doc.rect(0, 277, W, 20, "F");
+    doc.setTextColor(255, 255, 255);
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(10);
+    doc.text("RARA Fashion Mall  |  Thank you for shopping with us", W / 2, 285, { align: "center" });
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(8.5);
+    doc.text(SHOP_ADDRESS + "  |  Contact: " + SHOP_PHONE, W / 2, 291, { align: "center" });
+
+    return doc;
+}
+
+function pdfFileName(record) {
+    return "RARA_Bill_" + (record.customer || "Customer").replace(/\s+/g, "_") +
+        "_" + (record.date || "") + ".pdf";
+}
+
+function downloadPdf(record) {
+    record = record || lastRecord;
+    if (!record) return;
+    const doc = buildPdf(record);
+    if (doc) doc.save(pdfFileName(record));
+}
+
+function sendLastBill() {
+    if (!lastRecord) {
+        alert("Pehle koi data submit karein, phir bill bhej sakte hain!");
+        return;
+    }
+    sendWhatsApp(lastRecord);
+}
+
+async function sendWhatsApp(record) {
+    record = record || lastRecord;
+    if (!record) return;
+
+    const doc = buildPdf(record);
+    if (!doc) return;
+
+    const fileName = pdfFileName(record);
+    const file = new File([doc.output("blob")], fileName, { type: "application/pdf" });
+    const text = "RARA Fashion Mall\nNamaste " + (record.customer || "") +
+        ", aapka bill: Final Price " + money(record.finalPrice) + ". Dhanyavaad!";
+
+    // Mobile: share PDF directly (choose WhatsApp)
+    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+        try {
+            await navigator.share({ files: [file], text: text, title: "RARA Bill" });
+            return;
+        } catch (e) {
+            if (e.name === "AbortError") return;
+        }
+    }
+
+    // Laptop / fallback: download PDF + open WhatsApp chat
+    doc.save(fileName);
+    const num = cleanPhone(record.customerPhone);
+    const url = (num ? "https://wa.me/" + num : "https://wa.me/") +
+        "?text=" + encodeURIComponent(text);
+    alert("PDF download ho gayi. WhatsApp khulega, wahan PDF attach karke bhej dein.");
+    window.open(url, "_blank");
+}
+
+
+// Export All Records to Excel
+function exportExcel() {
+    if (salesRecords.length === 0) {
+        alert("Excel export karne ke liye pehle data submit karein!");
+        return;
+    }
+
+    if (typeof XLSX === "undefined") {
+        alert("Excel library load nahi hui. Internet connection check karein.");
+        return;
+    }
+
+    const excelData = salesRecords.map(record => ({
+        "Date": record.date,
+        "Customer Name": record.customer,
+        "Customer No": record.customerPhone,
+        "Items": record.items.map(item =>
+            item.name + " (Qty: " + item.quantity + ")"
+        ).join(", "),
+        "MRP": record.mrp || "",
+        "Discount Percentage": record.discountPercent !== null
+            ? record.discountPercent.toFixed(2) + "%"
+            : "",
+        "Final Price": record.finalPrice || "",
+        "Custom Item": record.custom,
+        "Payment Mode": record.paymentMode,
+        "Paid Amount": record.dueAmount > 0 ? record.paidAmount : "",
+        "Due Amount": record.dueAmount > 0 ? record.dueAmount : ""
+    }));
+
+    const worksheet = XLSX.utils.json_to_sheet(excelData);
+    const workbook = XLSX.utils.book_new();
+
+    XLSX.utils.book_append_sheet(workbook, worksheet, "RARA Sales Records");
+    XLSX.writeFile(workbook, "RARA_Fashion_Sales_Records.xlsx");
+}
+</script>
+
+</body>
+</html>
