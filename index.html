@@ -30,7 +30,7 @@ body {
     max-width: 850px;
     margin: auto;
     padding: 25px;
-    background: #c2c3c8;
+    background: #fff;
     border-radius: 18px;
     box-shadow: 0 10px 35px rgba(0,0,0,.2);
 }
@@ -442,7 +442,7 @@ input[type="checkbox"] {
     color: var(--p3);
 }
 
-#shirtQty, #jeansQty, #tshirtQty {
+#shirtQty, #jeansQty, #tshirtQty, #dressQty, #shoesQty {
     padding: 12px 4px;
     text-align: center;
     text-align-last: center;
@@ -584,7 +584,7 @@ button:active {
         padding: 2px 10px 10px;
     }
 
-    #shirtQty, #jeansQty, #tshirtQty { padding: 12px 2px; }
+    #shirtQty, #jeansQty, #tshirtQty, #dressQty, #shoesQty { padding: 12px 2px; }
 
     button { min-height: 46px; }
 
@@ -738,6 +738,87 @@ button:active {
             <div>
                 <label class="quantity-label" for="tshirtQty">Qty</label>
                 <select id="tshirtQty">
+                    <option value="1">1</option>
+                    <option value="2">2</option>
+                    <option value="3">3</option>
+                    <option value="4">4</option>
+                    <option value="5">5</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Girls Dresses -->
+        <div class="item-row">
+            <div>
+                <label for="dress">Girls Dresses</label>
+                <select id="dress">
+                    <option value="">Select Girls Dress</option>
+                    <optgroup label="Girls Dresses">
+                        <option>Girls Dress</option>
+                        <option>Frock</option>
+                        <option>Western Dress</option>
+                        <option>Party Wear Dress</option>
+                        <option>Gown</option>
+                        <option>Lehenga / Ghagra Choli</option>
+                        <option>Kurti</option>
+                        <option>Kurta Set</option>
+                        <option>Salwar Suit</option>
+                        <option>Saree</option>
+                        <option>Top</option>
+                        <option>Crop Top</option>
+                        <option>Skirt</option>
+                        <option>Palazzo</option>
+                        <option>Leggings</option>
+                        <option>Jeggings</option>
+                        <option>Girls Jeans</option>
+                        <option>Co-ord Set</option>
+                        <option>Jumpsuit</option>
+                        <option>Dungaree</option>
+                    </optgroup>
+                </select>
+            </div>
+            <div>
+                <label class="quantity-label" for="dressQty">Qty</label>
+                <select id="dressQty">
+                    <option value="1">1</option>
+                    <option value="2">2</option>
+                    <option value="3">3</option>
+                    <option value="4">4</option>
+                    <option value="5">5</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Shoes -->
+        <div class="item-row">
+            <div>
+                <label for="shoes">Shoes</label>
+                <select id="shoes">
+                    <option value="">Select Shoes</option>
+                    <optgroup label="Shoes">
+                        <option>Sports Shoes</option>
+                        <option>Running Shoes</option>
+                        <option>Casual Shoes</option>
+                        <option>Formal Shoes</option>
+                        <option>Sneakers</option>
+                        <option>Canvas Shoes</option>
+                        <option>Loafers</option>
+                        <option>Boots</option>
+                        <option>Sandals</option>
+                        <option>Floaters</option>
+                        <option>Slippers</option>
+                        <option>Flip Flops</option>
+                        <option>Chappal</option>
+                        <option>Heels</option>
+                        <option>Flats</option>
+                        <option>Crocs</option>
+                        <option>Kids Shoes</option>
+                    </optgroup>
+                </select>
+            </div>
+            <div>
+                <label class="quantity-label" for="shoesQty">Qty</label>
+                <select id="shoesQty">
                     <option value="1">1</option>
                     <option value="2">2</option>
                     <option value="3">3</option>
@@ -1052,6 +1133,8 @@ $("entryForm").addEventListener("submit", function(event) {
     const shirt = $("shirt").value;
     const jeans = $("jeans").value;
     const tshirt = $("tshirt").value;
+    const dress = $("dress").value;
+    const shoes = $("shoes").value;
     const custom = $("custom").value.trim();
 
     const items = [];
@@ -1066,6 +1149,14 @@ $("entryForm").addEventListener("submit", function(event) {
 
     if (tshirt) {
         items.push({ name: tshirt, quantity: Number($("tshirtQty").value) });
+    }
+
+    if (dress) {
+        items.push({ name: dress, quantity: Number($("dressQty").value) });
+    }
+
+    if (shoes) {
+        items.push({ name: shoes, quantity: Number($("shoesQty").value) });
     }
 
     if (custom) {
@@ -1155,6 +1246,9 @@ $("entryForm").addEventListener("submit", function(event) {
         showToast("Google Sheet me save nahi hua! Internet check karein.", true);
     });
 
+    // Customer number hai to bill PDF background me Drive me save karo (link ke liye)
+    if (record.customerPhone) record.pdfPromise = uploadBill(record);
+
     this.reset();
     setTodayDate();
 
@@ -1193,7 +1287,7 @@ function buildPdf(record) {
         return null;
     }
 
-    const doc = new window.jspdf.jsPDF({ unit: "mm", format: "a4" });
+    const doc = new window.jspdf.jsPDF({ unit: "mm", format: "a4", compress: true });
     const W = 210;
     const PURPLE = [52, 32, 91];
     const ACCENT = [113, 54, 168];
@@ -1217,17 +1311,22 @@ function buildPdf(record) {
     try {
         const img = $("logoPreview");
         if (img && img.complete && img.naturalWidth > 0) {
+            // Logo ko chhota (max 300px) karke transparent PNG rakhte hain, taaki PDF halki rahe
+            const scale = Math.min(1, 300 / Math.max(img.naturalWidth, img.naturalHeight));
             const c = document.createElement("canvas");
-            c.width = img.naturalWidth;
-            c.height = img.naturalHeight;
-            c.getContext("2d").drawImage(img, 0, 0);
+            c.width = Math.max(1, Math.round(img.naturalWidth * scale));
+            c.height = Math.max(1, Math.round(img.naturalHeight * scale));
+            const ctx = c.getContext("2d");
+            ctx.clearRect(0, 0, c.width, c.height);   // background transparent
+            ctx.drawImage(img, 0, 0, c.width, c.height);
             const data = c.toDataURL("image/png");
-            const h = 28;
-            const w = Math.min(40, h * img.naturalWidth / img.naturalHeight);
-            doc.setFillColor(255, 255, 255);
-            doc.roundedRect(12, 7, w + 6, 32, 3, 3, "F");
-            doc.addImage(data, "PNG", 15, 9, w, h);
-            textX = 15 + w + 12;
+
+            const ratio = img.naturalWidth / img.naturalHeight;
+            let h = 30;
+            let w = h * ratio;
+            if (w > 42) { w = 42; h = w / ratio; }
+            doc.addImage(data, "PNG", 15, 8 + (30 - h) / 2, w, h, undefined, "FAST");
+            textX = 15 + w + 10;
         }
     } catch (e) { /* no logo */ }
 
@@ -1309,6 +1408,7 @@ function buildPdf(record) {
     doc.setDrawColor(...ACCENT);
     doc.setLineWidth(0.6);
     doc.line(15, y, 195, y);
+    const tableEnd = y;
 
     // ----- Summary (right side) -----
     y += 12;
@@ -1349,12 +1449,12 @@ function buildPdf(record) {
     doc.setTextColor(...ACCENT);
     doc.setFont("helvetica", "bold");
     doc.setFontSize(18);
-    doc.text("Thank You!", 15, 124);
+    doc.text("Thank You!", 15, tableEnd + 16);
     doc.setTextColor(...GREY);
     doc.setFont("helvetica", "normal");
     doc.setFontSize(10);
-    doc.text("We appreciate your purchase", 15, 131);
-    doc.text("and hope to see you again.", 15, 137);
+    doc.text("We appreciate your purchase", 15, tableEnd + 23);
+    doc.text("and hope to see you again.", 15, tableEnd + 29);
 
     // ----- Footer -----
     doc.setFillColor(...PURPLE);
@@ -1390,35 +1490,93 @@ function sendLastBill() {
     sendWhatsApp(lastRecord);
 }
 
+// PDF ko Google Drive me save karke link banata hai (background me)
+async function uploadBill(record) {
+    try {
+        const doc = buildPdf(record);
+        if (!doc) return "";
+
+        const pdfBase64 = doc.output("datauristring").split(",")[1];
+        if (pdfBase64.length > 10 * 1024 * 1024) return "";   // bahut badi PDF upload nahi hogi
+
+        const ctrl = new AbortController();
+        const timer = setTimeout(() => ctrl.abort(), 25000);
+
+        const res = await fetch(SHEET_URL, {
+            method: "POST",
+            headers: { "Content-Type": "text/plain;charset=utf-8" },
+            body: JSON.stringify({
+                action: "uploadBill",
+                fileName: pdfFileName(record),
+                pdfBase64: pdfBase64
+            }),
+            signal: ctrl.signal
+        });
+        clearTimeout(timer);
+
+        const data = await res.json();
+        if (data && data.success && data.url) {
+            record.pdfUrl = data.url;
+            return data.url;
+        }
+    } catch (e) { /* link nahi bana, text bill hi jayega */ }
+    return "";
+}
+
+// WhatsApp message (bill ki poori detail + PDF link)
+function buildBillMessage(record) {
+    const lines = [];
+    lines.push("*RARA Fashion Mall*");
+    lines.push("Namaste " + (record.customer || "Customer") + ",");
+    lines.push("Aapka bill (" + (record.date || "") + "):");
+    record.items.forEach(it => lines.push("• " + it.name + " x " + it.quantity));
+    if (record.finalPrice > 0) lines.push("*Total: " + pdfMoney(record.finalPrice) + "*");
+    if (record.dueAmount > 0) {
+        lines.push("Paid: " + pdfMoney(record.paidAmount));
+        lines.push("*Baki Due: " + pdfMoney(record.dueAmount) + "*");
+    }
+    if (record.pdfUrl) lines.push("", "Bill PDF: " + record.pdfUrl);
+    lines.push("", "Dhanyavaad! Phir aaiyega.", SHOP_ADDRESS, "Contact: " + SHOP_PHONE);
+    return lines.join("\n");
+}
+
+// Ek click: customer ke number ka WhatsApp chat bill ke saath khulta hai
 async function sendWhatsApp(record) {
     record = record || lastRecord;
     if (!record) return;
 
-    const doc = buildPdf(record);
-    if (!doc) return;
-
-    const fileName = pdfFileName(record);
-    const file = new File([doc.output("blob")], fileName, { type: "application/pdf" });
-    const text = "RARA Fashion Mall\nNamaste " + (record.customer || "") +
-        ", aapka bill: Final Price " + money(record.finalPrice) + ". Dhanyavaad!";
-
-    // Mobile: share PDF directly (choose WhatsApp)
-    if (navigator.canShare && navigator.canShare({ files: [file] })) {
-        try {
-            await navigator.share({ files: [file], text: text, title: "RARA Bill" });
+    let num = cleanPhone(record.customerPhone);
+    if (num.length < 12) {
+        const typed = prompt("Customer ka WhatsApp number likhein (10 digit):");
+        if (typed === null) return;
+        num = cleanPhone(typed);
+        if (num.length < 12) {
+            alert("Sahi 10 digit number likhein!");
             return;
-        } catch (e) {
-            if (e.name === "AbortError") return;
+        }
+        record.customerPhone = typed.replace(/\D/g, "");
+    }
+
+    // Click ke turant baad tab kholo (browser popup block na kare)
+    const win = window.open("about:blank", "_blank");
+    showToast("Bill taiyaar ho raha hai...", false);
+
+    if (!record.pdfUrl) {
+        if (!record.pdfPromise) record.pdfPromise = uploadBill(record);
+        await record.pdfPromise;
+        if (!record.pdfUrl) {
+            record.pdfPromise = null;
+            showToast("PDF link nahi bana, sirf bill ka text bheja ja raha hai.", true);
         }
     }
 
-    // Laptop / fallback: download PDF + open WhatsApp chat
-    doc.save(fileName);
-    const num = cleanPhone(record.customerPhone);
-    const url = (num ? "https://wa.me/" + num : "https://wa.me/") +
-        "?text=" + encodeURIComponent(text);
-    alert("PDF download ho gayi. WhatsApp khulega, wahan PDF attach karke bhej dein.");
-    window.open(url, "_blank");
+    const url = "https://wa.me/" + num + "?text=" + encodeURIComponent(buildBillMessage(record));
+
+    if (win) {
+        win.location.href = url;
+    } else if (confirm("WhatsApp kholne ke liye OK dabayein")) {
+        window.open(url, "_blank");
+    }
 }
 
 
